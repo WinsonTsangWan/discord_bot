@@ -1,7 +1,8 @@
-import discord
 import youtube_dl
 import urllib
 import re
+
+from random import shuffle
 
 YTDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist':'True'}
 
@@ -14,8 +15,6 @@ class Queue:
         self.queue = []
         self.curr_song_info = {}
         self.history = []
-        self.size = 0
-        pass
 
     def add_song(self, ctx):
         # Search for query on Youtube, get URL of top search result
@@ -33,19 +32,31 @@ class Queue:
             info = ytdl.extract_info(top_result_url, download = False)
             info["page_url"] = top_result_url 
         self.queue.append(info)
-        self.size += 1
         return info
 
     def next_song(self):
-        self.size -= 1
-        self.curr_song_info= self.queue.pop(0)
-        self.history.insert(0, self.curr_song_info)
+        if self.curr_song_info:
+            self.history.insert(0, self.curr_song_info)
+        self.curr_song_info = self.queue.pop(0)
         return self.curr_song_info
 
-    def current_song(self):
+    def get_history(self):
+        return self.history
+
+    def get_current_song(self):
         return self.curr_song_info
 
-    def clear(self):
-        self.queue = []
-        self.size = 0
+    def get_queue(self):
+        return self.queue
     
+    def get_size(self):
+        return len(self.queue)
+    
+    def repeat_song(self):
+        self.queue.insert(0, self.curr_song_info)
+
+    def clear_queue(self):
+        self.queue = []
+
+    def shuffle(self):
+        shuffle(self.queue)
